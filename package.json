@@ -4,6 +4,7 @@
   "description": "Aplikasi Perizinan Cuti/Lembur IWARE",
   "main": "server.js",
   "scripts": {
+    "start": "cd backend && npm start",
     "server": "cd backend && npm start",
     "server:dev": "cd backend && npm run dev",
     "client": "cd frontend && npm start",
