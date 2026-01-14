@@ -1,7 +1,14 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+
+// Load .env.railway.local jika ada, fallback ke .env
+const envFile = fs.existsSync(path.join(__dirname, '../.env.railway.local')) 
+  ? '../.env.railway.local' 
+  : '../.env';
+require('dotenv').config({ path: path.join(__dirname, envFile) });
+
+console.log(`📁 Using env file: ${envFile}`);
 
 async function initDatabase() {
   console.log('🔄 Initializing Railway MySQL database...');

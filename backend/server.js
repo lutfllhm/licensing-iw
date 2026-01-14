@@ -10,6 +10,14 @@ const app = express();
 // Auto-initialize database on startup (Railway)
 async function initDatabaseIfNeeded() {
   try {
+    console.log('🔍 Checking database connection...');
+    console.log(`📍 DB Host: ${process.env.DB_HOST || 'localhost'}`);
+    console.log(`� DB Name: ${process.env.DB_NAME || 'iware_perizinan'}`);
+    
+    // Test connection first
+    await db.query('SELECT 1');
+    console.log('✅ Database connection successful');
+    
     // Cek apakah tabel users sudah ada
     const [tables] = await db.query("SHOW TABLES LIKE 'users'");
     
@@ -32,7 +40,9 @@ async function initDatabaseIfNeeded() {
       console.log('✅ Database sudah diinisialisasi');
     }
   } catch (error) {
-    console.error('⚠️ Error saat cek/init database:', error.message);
+    console.error('❌ Error saat cek/init database:', error.message);
+    console.error('💡 Pastikan MySQL service sudah running dan environment variables sudah di-set');
+    // Don't exit, let the app start anyway
   }
 }
 
@@ -75,8 +85,10 @@ app.get('/api/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const HOST = '0.0.0.0'; // Railway requires binding to 0.0.0.0
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`🚀 Server berjalan di port ${PORT}`);
   console.log(`📡 API tersedia di http://localhost:${PORT}/api`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });

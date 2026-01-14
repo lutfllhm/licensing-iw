@@ -6,3 +6,8 @@ buildCommand = "npm install"
 startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+# Run database initialization after deployment (only needed once)
+# Comment out after first successful run
+# healthcheckPath = "/"
+# healthcheckTimeout = 100
