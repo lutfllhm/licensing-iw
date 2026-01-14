@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { pengajuanAPI, authAPI } from '../utils/api';
+import { pengajuanAPI, authAPI, API_URL } from '../utils/api';
 import { 
   FiHome, FiFileText, FiBarChart2, FiLogOut, FiMenu, FiX,
   FiClock, FiCheckCircle, FiXCircle, FiEye, FiTrash2, FiSettings, FiUser
@@ -658,7 +658,7 @@ const DaftarPengajuan = () => {
                     <label className="text-sm font-medium text-gray-500">Bukti Foto</label>
                     <div className="mt-2">
                       <img
-                        src={`http://localhost:5000/uploads/${selectedItem.bukti_foto}`}
+                        src={`${API_URL}/uploads/${selectedItem.bukti_foto}`}
                         alt="Bukti"
                         className="max-w-full h-auto rounded-lg shadow-md"
                         onError={(e) => {

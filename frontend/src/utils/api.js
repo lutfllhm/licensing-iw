@@ -1,9 +1,12 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+// Gunakan environment variable untuk API URL
+// Development: http://localhost:5000
+// Production: https://your-backend.up.railway.app
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api`,
 });
 
 api.interceptors.request.use((config) => {
@@ -33,5 +36,8 @@ export const pengajuanAPI = {
   getStats: () => api.get('/pengajuan/stats/dashboard'),
   getReport: (params) => api.get('/pengajuan/report', { params }),
 };
+
+// Export API_URL untuk digunakan di komponen lain (misal untuk image URL)
+export { API_URL };
 
 export default api;
