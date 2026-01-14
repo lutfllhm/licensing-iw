@@ -2,17 +2,23 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const db = require('./config/database');
 require('dotenv').config();
 
 const app = express();
+
+console.log('🚀 Starting server...');
+console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+console.log('📍 Port:', process.env.PORT || 5000);
 
 // Auto-initialize database on startup (Railway)
 async function initDatabaseIfNeeded() {
   try {
     console.log('🔍 Checking database connection...');
     console.log(`📍 DB Host: ${process.env.DB_HOST || 'localhost'}`);
-    console.log(`� DB Name: ${process.env.DB_NAME || 'iware_perizinan'}`);
+    console.log(`📍 DB Name: ${process.env.DB_NAME || 'iware_perizinan'}`);
+    console.log(`📍 MYSQL_URL: ${process.env.MYSQL_URL ? 'SET' : 'NOT SET'}`);
+    
+    const db = require('./config/database');
     
     // Test connection first
     await db.query('SELECT 1');
@@ -42,12 +48,10 @@ async function initDatabaseIfNeeded() {
   } catch (error) {
     console.error('❌ Error saat cek/init database:', error.message);
     console.error('💡 Pastikan MySQL service sudah running dan environment variables sudah di-set');
-    // Don't exit, let the app start anyway
+    console.error('💡 Stack:', error.stack);
+    // Don't exit, let the app start anyway for debugging
   }
 }
-
-// Jalankan init database
-initDatabaseIfNeeded();
 
 // Middleware
 // CORS Configuration - Update FRONTEND_URL setelah deploy
@@ -75,20 +79,50 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes - Rute API
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/pengajuan', require('./routes/pengajuan'));
-
-// Pemeriksaan kesehatan server
+// Health check - harus sebelum routes lain
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server berjalan dengan baik' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Server berjalan dengan baik',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Routes - Rute API
+try {
+  app.use('/api/auth', require('./routes/auth'));
+  app.use('/api/pengajuan', require('./routes/pengajuan'));
+  console.log('✅ Routes loaded successfully');
+} catch (error) {
+  console.error('❌ Error loading routes:', error.message);
+}
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('❌ Server error:', err);
+  res.status(500).json({ 
+    status: 'ERROR', 
+    message: err.message 
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0'; // Railway requires binding to 0.0.0.0
 
-app.listen(PORT, HOST, () => {
+// Start server first, then init database
+const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Server berjalan di port ${PORT}`);
   console.log(`📡 API tersedia di http://localhost:${PORT}/api`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Initialize database after server starts
+  initDatabaseIfNeeded().catch(err => {
+    console.error('❌ Database initialization failed:', err.message);
+  });
+});
+
+server.on('error', (err) => {
+  console.error('❌ Server failed to start:', err.message);
+  process.exit(1);
 });
