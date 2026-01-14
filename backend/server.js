@@ -1,9 +1,43 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const db = require('./config/database');
 require('dotenv').config();
 
 const app = express();
+
+// Auto-initialize database on startup (Railway)
+async function initDatabaseIfNeeded() {
+  try {
+    // Cek apakah tabel users sudah ada
+    const [tables] = await db.query("SHOW TABLES LIKE 'users'");
+    
+    if (tables.length === 0) {
+      console.log('🔄 Database belum diinisialisasi, menjalankan init-db.sql...');
+      
+      const sqlFile = path.join(__dirname, 'config/init-db.sql');
+      const sql = fs.readFileSync(sqlFile, 'utf8');
+      
+      // Split SQL statements dan execute satu per satu
+      const statements = sql.split(';').filter(stmt => stmt.trim());
+      for (const statement of statements) {
+        if (statement.trim()) {
+          await db.query(statement);
+        }
+      }
+      
+      console.log('✅ Database berhasil diinisialisasi!');
+    } else {
+      console.log('✅ Database sudah diinisialisasi');
+    }
+  } catch (error) {
+    console.error('⚠️ Error saat cek/init database:', error.message);
+  }
+}
+
+// Jalankan init database
+initDatabaseIfNeeded();
 
 // Middleware
 // CORS Configuration - Update FRONTEND_URL setelah deploy
