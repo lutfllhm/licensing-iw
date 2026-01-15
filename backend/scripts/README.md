@@ -1,8 +1,52 @@
-# Backend Scripts - Password Management
+# Backend Scripts - Password Management & Railway Deployment
 
-Folder ini berisi utility scripts untuk manajemen password dan security.
+Folder ini berisi utility scripts untuk manajemen password, security, dan deployment ke Railway.
 
-## Scripts Available
+## 🚀 Railway Deployment Scripts
+
+### test-railway-mysql.js
+Test koneksi ke Railway MySQL database.
+
+**Usage:**
+```bash
+# 1. Isi kredensial Railway di .env.railway.local
+# 2. Run test
+node backend/scripts/test-railway-mysql.js
+```
+
+**Output:**
+```
+✅ Connected to MySQL server!
+✅ Available databases: railway, information_schema, ...
+✅ Using database: railway
+✅ Existing tables: users, pengajuan, ...
+```
+
+### init-railway-db.js
+Initialize database Railway dengan schema dan data awal.
+
+**Usage:**
+```bash
+# Via Railway CLI
+railway run node backend/scripts/init-railway-db.js
+
+# Atau set environment variables manual
+node backend/scripts/init-railway-db.js
+```
+
+### import-to-railway.js
+Import data dari database lokal ke Railway.
+
+**Usage:**
+```bash
+# 1. Export database lokal
+mysqldump -u root -p iware_perizinan > backup.sql
+
+# 2. Import ke Railway
+node backend/scripts/import-to-railway.js
+```
+
+## 🔐 Password Management Scripts
 
 ### 1. generate-hash.js
 Generate bcrypt hash untuk password baru.
